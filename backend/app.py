@@ -3,6 +3,7 @@ from flask_cors import CORS
 import random
 
 from game_engine import Player, generate_offer_list
+from game_engine.casting import generate_talent_pool
 
 # Simple in-memory session store
 SESSION = {}
@@ -35,6 +36,19 @@ def get_projects():
     offers = generate_offer_list()
     SESSION["offers"] = offers
     return jsonify({"offers": offers})
+
+
+@app.route("/get_talent_pool", methods=["GET"])
+def get_talent_pool():
+    """Return a generated talent pool for the requested role."""
+
+    role = request.args.get("role")
+    if not role:
+        return jsonify({"error": "Role is required"}), 400
+
+    pool = generate_talent_pool(role)
+    SESSION["talent_pool"] = [t.to_dict() for t in pool]
+    return jsonify(SESSION["talent_pool"])
 
 
 @app.route("/select_project", methods=["POST"])
@@ -94,7 +108,8 @@ def add_completed_project(player, project, results):
 @app.route("/select_cast", methods=["POST"])
 def select_cast():
     data = request.get_json(force=True)
-    cast_ids = data.get("cast_ids", [])
+    selections = data.get("selections", {})
+    cast_ids = list(selections.values()) if isinstance(selections, dict) else []
     pool = SESSION.get("talent_pool", [])
     selected = [t for t in pool if t.get("id") in cast_ids]
     SESSION["selected_cast"] = selected

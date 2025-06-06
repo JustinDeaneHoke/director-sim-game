@@ -1,10 +1,12 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Dict, Any
 import random
 
 @dataclass
 class Talent:
     """Represents an actor or crew member."""
+
+    id: int
     name: str
     role: str
     star_power: int  # affects box office
@@ -13,6 +15,21 @@ class Talent:
     availability: bool
     working_relationship: float  # modifier based on past work with player
     wants_to_work_with_player: bool
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Return a JSON-serializable representation using camelCase keys."""
+
+        return {
+            "id": self.id,
+            "name": self.name,
+            "role": self.role,
+            "starPower": self.star_power,
+            "skill": self.skill,
+            "cost": self.cost,
+            "available": self.availability,
+            "workingRelationship": self.working_relationship,
+            "wantsToWorkWithPlayer": self.wants_to_work_with_player,
+        }
 
 # Placeholder reputation value until hooked into player profile
 PLAYER_REPUTATION = 0.6  # 0 (terrible) - 1 (excellent)
@@ -35,6 +52,7 @@ def generate_talent_pool(role: str, count: int = 5) -> List[Talent]:
 
         pool.append(
             Talent(
+                id=i + 1,
                 name=name,
                 role=role,
                 star_power=star_power,
