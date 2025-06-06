@@ -137,6 +137,7 @@ def release_project():
     completed = dict(project)
     completed.update(release_results)
     add_completed_project(player, completed)
+    SESSION.pop("talent_pools", None)
 
     SESSION.pop("selected_project", None)
     SESSION.pop("selected_cast", None)
