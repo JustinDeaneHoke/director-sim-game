@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from typing import Dict, List
 
 try:
@@ -43,3 +43,10 @@ class Player:
             "genre_strengths": self.genre_strengths,
             "projects_completed": len(self.past_projects),
         }
+
+    def to_dict(self) -> Dict[str, object]:
+        """Return a JSON-serializable representation of the player."""
+        data = asdict(self)
+        if hasattr(self, "completed_projects"):
+            data["completed_projects"] = getattr(self, "completed_projects")
+        return data
