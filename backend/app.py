@@ -50,8 +50,9 @@ def get_talent_pool():
         return jsonify({"error": "Role is required"}), 400
 
     pool = generate_talent_pool(role)
-    SESSION["talent_pool"] = [t.to_dict() for t in pool]
-    return jsonify(SESSION["talent_pool"])
+    # Keep the actual Talent objects in session for later use
+    SESSION.setdefault("talent_pools", {})[role] = pool
+    return jsonify([t.to_dict() for t in pool])
 
 
 @app.route("/get_profile", methods=["GET"])
@@ -101,10 +102,14 @@ def select_cast():
     except (TypeError, ValueError):
         cast_ids = []
 
-    pool = SESSION.get("talent_pool", [])
-    selected = [t for t in pool if t.get("id") in cast_ids]
+    pools = SESSION.get("talent_pools", {})
+    # Search across all role pools for the selected ids
+    selected: list = []
+    for role_pool in pools.values():
+        selected.extend([t for t in role_pool if t.id in cast_ids])
+
     SESSION["selected_cast"] = selected
-    return jsonify({"selected_cast": selected})
+    return jsonify({"selected_cast": [t.to_dict() for t in selected]})
 
 
 @app.route("/start_production", methods=["POST"])
@@ -126,16 +131,12 @@ def release_project():
     cast = SESSION.get("selected_cast", [])
     if not project or not production or not player:
         return jsonify({"error": "Production not completed"}), 400
-quality = production.get("final_quality_score")
-release_results = evaluate_release(project, quality, cast)
-completed = dict(project)
-completed.update(release_results)
-add_completed_project(player, completed)
 
-SESSION.pop("selected_project", None)
-SESSION.pop("selected_cast", None)
-SESSION.pop("production_result", None)
-return jsonify(release_results)
+    quality = production.get("final_quality_score")
+    release_results = evaluate_release(project, quality, cast)
+    completed = dict(project)
+    completed.update(release_results)
+    add_completed_project(player, completed)
 
     SESSION.pop("selected_project", None)
     SESSION.pop("selected_cast", None)
