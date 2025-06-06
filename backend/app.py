@@ -115,8 +115,13 @@ def evaluate_release(project, quality):
 @app.route("/select_cast", methods=["POST"])
 def select_cast():
     data = request.get_json(force=True)
-    selections = data.get("selections", {})
-    cast_ids = list(selections.values()) if isinstance(selections, dict) else []
+    cast_ids = data.get("cast_ids", [])
+    # Ensure cast ids are integers in case they come in as strings
+    try:
+        cast_ids = [int(cid) for cid in cast_ids]
+    except (TypeError, ValueError):
+        cast_ids = []
+
     pool = SESSION.get("talent_pool", [])
     selected = [t for t in pool if t.get("id") in cast_ids]
     SESSION["selected_cast"] = selected
