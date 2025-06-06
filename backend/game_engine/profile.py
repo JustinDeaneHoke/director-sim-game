@@ -71,11 +71,15 @@ def get_profile_summary(player: 'Player') -> Dict[str, Any]:
             awards.add(award)
 
         summaries.append({
+            "id": p.get("id"),
             "title": p.get("title"),
             "year": p.get("year"),
             "medium": p.get("medium"),
             "genre": p.get("genre"),
             "poster_url": p.get("poster_url"),
+            "critics_score": critics_score,
+            "fan_score": fan_score,
+            "awards": p.get("awards", []),
         })
 
     avg_critics = total_critics / total_projects if total_projects else 0.0
