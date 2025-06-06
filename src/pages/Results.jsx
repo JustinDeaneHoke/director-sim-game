@@ -78,7 +78,7 @@ function Results() {
         </p>
       </div>
       <button
-        onClick={() => navigate('/dashboard')}
+        onClick={() => navigate('/')}
         className="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
       >
         Return to Dashboard
