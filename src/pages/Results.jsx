@@ -40,8 +40,7 @@ function Results() {
     box_office,
     viewership,
     profit,
-    awards,
-    flavor_text
+    awards
   } = data || {};
 
   const hasAwards = Array.isArray(awards) && awards.length > 0;
@@ -72,7 +71,6 @@ function Results() {
           </div>
         )}
 
-        {flavor_text && <p className="italic">{flavor_text}</p>}
         <p className="font-semibold mt-4">
           Your project earned ${profit?.toLocaleString()} and scored a {critics_score} with critics.
         </p>
