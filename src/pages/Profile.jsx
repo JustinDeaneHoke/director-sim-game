@@ -31,8 +31,9 @@ export default function Profile() {
     total_projects,
     average_critics_score,
     average_fan_score,
-    career_box_office,
-    awards,
+    total_box_office,
+    total_viewership,
+    awards_won,
     projects = [],
   } = profile;
 
@@ -53,13 +54,19 @@ export default function Profile() {
           <p className="text-xl font-semibold">{average_fan_score}</p>
         </div>
         <div className="bg-gray-50 p-4 rounded">
-          <p className="text-gray-600">Career Box Office</p>
-          <p className="text-xl font-semibold">${career_box_office.toLocaleString()}</p>
+          <p className="text-gray-600">
+            {typeof total_viewership === 'number' ? 'Total Viewership' : 'Career Box Office'}
+          </p>
+          <p className="text-xl font-semibold">
+            {typeof total_viewership === 'number'
+              ? total_viewership.toLocaleString()
+              : `$${(total_box_office || 0).toLocaleString()}`}
+          </p>
         </div>
-        {awards && awards.length > 0 && (
+        {awards_won && awards_won.length > 0 && (
           <div className="col-span-2 bg-yellow-50 p-4 rounded">
             <p className="text-yellow-700 font-medium">Awards Won</p>
-            <p>{awards.join(', ')}</p>
+            <p>{awards_won.join(', ')}</p>
           </div>
         )}
       </div>
