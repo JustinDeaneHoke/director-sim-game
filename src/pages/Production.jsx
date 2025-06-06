@@ -31,12 +31,7 @@ const Production = () => {
     fetchProduction();
   }, []);
 
-  const handleFinishProduction = async () => {
-    try {
-      await fetch('/release_project', { method: 'POST' });
-    } catch (err) {
-      console.error(err);
-    }
+  const handleFinishProduction = () => {
     navigate('/results');
   };
 
