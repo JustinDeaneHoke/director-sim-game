@@ -5,7 +5,7 @@ import { useProject } from '../contexts/ProjectContext';
 
 function Project() {
   const navigate = useNavigate();
-  const { project } = useProject();
+  const { selectedProject: project } = useProject();
   const [talentPools, setTalentPools] = useState({});
   const [selected, setSelected] = useState({});
   const [error, setError] = useState('');
