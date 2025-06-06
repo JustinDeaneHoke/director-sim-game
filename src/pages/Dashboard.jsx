@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getProjects, selectProject } from '../api/api';
+import { getProjects, selectProject, startGame } from '../api/api';
 import ProjectCard from '../components/ProjectCard';
 import { useProject } from '../contexts/ProjectContext';
 
@@ -12,19 +12,24 @@ const Dashboard = () => {
   const { setSelectedProject } = useProject();
 
   useEffect(() => {
-    const fetchProjects = async () => {
+    let isMounted = true;
+    const startAndFetch = async () => {
       setLoading(true);
       try {
+        await startGame('Player');
         const { data } = await getProjects();
-        setProjects(data.offers);
+        if (isMounted) setProjects(data.offers);
       } catch (err) {
-        setError('Failed to load projects');
+        if (isMounted) setError('Failed to load projects');
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
-    fetchProjects();
+    startAndFetch();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleSelect = async (project) => {

@@ -9,4 +9,8 @@ export const getProjects = () => api.get('/get_projects');
 export const selectProject = (id) =>
   api.post('/select_project', { project_id: id });
 
+// Start a new game session with a default player name
+export const startGame = (name = 'Player') =>
+  api.post('/start_game', { name });
+
 export default api;
