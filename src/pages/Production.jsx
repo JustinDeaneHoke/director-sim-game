@@ -9,6 +9,7 @@ const Production = () => {
   const navigate = useNavigate();
   const [log, setLog] = useState([]);
   const [delays, setDelays] = useState('');
+  // Holds a comma separated list of major production issues
   const [issues, setIssues] = useState('');
   const [feedback, setFeedback] = useState('');
   const [qualityScore, setQualityScore] = useState(null);
@@ -21,7 +22,8 @@ const Production = () => {
         const data = await res.json();
         setLog(data.production_notes || []);
         setDelays(data.delays);
-        setIssues(data.issues);
+        // Convert array of issues to a readable string
+        setIssues(Array.isArray(data.issues) ? data.issues.join(', ') : data.issues);
         setFeedback(data.studio_feedback);
         setQualityScore(data.final_quality_score);
       } catch (err) {
