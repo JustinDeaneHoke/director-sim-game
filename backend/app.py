@@ -126,16 +126,11 @@ def release_project():
     cast = SESSION.get("selected_cast", [])
     if not project or not production or not player:
         return jsonify({"error": "Production not completed"}), 400
-quality = production.get("final_quality_score")
-release_results = evaluate_release(project, quality, cast)
-completed = dict(project)
-completed.update(release_results)
-add_completed_project(player, completed)
-
-SESSION.pop("selected_project", None)
-SESSION.pop("selected_cast", None)
-SESSION.pop("production_result", None)
-return jsonify(release_results)
+    quality = production.get("final_quality_score")
+    release_results = evaluate_release(project, quality, cast)
+    completed = dict(project)
+    completed.update(release_results)
+    add_completed_project(player, completed)
 
     SESSION.pop("selected_project", None)
     SESSION.pop("selected_cast", None)
