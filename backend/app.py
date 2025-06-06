@@ -142,7 +142,8 @@ def release_project():
     if not project or not production or not player:
         return jsonify({"error": "Production not completed"}), 400
     release_results = evaluate_release(project, production.get("quality"))
-    add_completed_project(player, project, release_results)
+    merged_project = {**project, **release_results}
+    add_completed_project(player, merged_project)
     SESSION.pop("selected_project", None)
     SESSION.pop("selected_cast", None)
     SESSION.pop("production_result", None)
