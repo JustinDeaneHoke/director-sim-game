@@ -1,9 +1,11 @@
+from dataclasses import asdict
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import random
 
 from game_engine import Player, generate_offer_list
 from game_engine.casting import generate_talent_pool
+from game_engine.profile import add_completed_project, get_profile_summary
 
 # Simple in-memory session store
 SESSION = {}
@@ -24,7 +26,7 @@ def start_game():
     player = Player(name)
     SESSION["player"] = player
 
-    return jsonify(player.to_dict())
+    return jsonify(asdict(player))
 
 
 @app.route("/get_projects", methods=["GET"])
@@ -49,6 +51,17 @@ def get_talent_pool():
     pool = generate_talent_pool(role)
     SESSION["talent_pool"] = [t.to_dict() for t in pool]
     return jsonify(SESSION["talent_pool"])
+
+
+@app.route("/get_profile", methods=["GET"])
+def get_profile():
+    """Return a summary of the current player's career so far."""
+    player = SESSION.get("player")
+    if not player:
+        return jsonify({"error": "Game not started"}), 400
+
+    summary = get_profile_summary(player)
+    return jsonify(summary)
 
 
 @app.route("/select_project", methods=["POST"])
@@ -97,12 +110,6 @@ def evaluate_release(project, quality):
         "awards": awards,
         "summary": summary,
     }
-
-
-def add_completed_project(player, project, results):
-    completed = getattr(player, "completed_projects", [])
-    completed.append({"project": project, "results": results})
-    setattr(player, "completed_projects", completed)
 
 
 @app.route("/select_cast", methods=["POST"])
