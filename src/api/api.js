@@ -5,6 +5,8 @@ const api = axios.create({
 });
 
 export const getProjects = () => api.get('/get_projects');
-export const selectProject = (id) => api.post('/select_project', { id });
+// Send project ID using the key expected by the backend
+export const selectProject = (id) =>
+  api.post('/select_project', { project_id: id });
 
 export default api;

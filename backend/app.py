@@ -1,11 +1,12 @@
 from dataclasses import asdict
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import random
 
 from game_engine import Player, generate_offer_list
 from game_engine.casting import generate_talent_pool
 from game_engine.profile import add_completed_project, get_profile_summary
+from game_engine.production import simulate_production
+from game_engine.release import evaluate_release as engine_evaluate_release
 
 # Simple in-memory session store
 SESSION = {}
@@ -79,44 +80,27 @@ def select_project():
 
 # --- PHASE 2: Casting, Production, and Release ---
 
+
 def run_production(project, cast):
-    """Simulate a production run and return result dictionary."""
-    quality = random.randint(1, 100)
-    delays = random.choice([0, 1, 2])  # simple delay indicator
-    notes = f"Production completed with {len(cast)} cast members."
-    return {"quality": quality, "delays": delays, "notes": notes}
+    """Wrapper around :func:`simulate_production` from ``game_engine``."""
+    return simulate_production(project, cast)
 
 
-def evaluate_release(project, quality):
-    """Simulate release evaluation."""
-    scores = {
-        "critics": random.randint(1, 10),
-        "audience": random.randint(1, 10),
-    }
-    profit = random.randint(10000, 1000000)
-    awards = random.choice([
-        [],
-        ["Best Picture"],
-        ["Audience Choice"],
-    ])
-    summary = random.choice([
-        "Critics called it a surprise hit!",
-        "Mixed reception but solid earnings.",
-        "A flop at the box office.",
-    ])
-    return {
-        "scores": scores,
-        "profit": profit,
-        "awards": awards,
-        "summary": summary,
-    }
+def evaluate_release(project, quality, cast):
+    """Wrapper around :func:`evaluate_release` from ``game_engine``."""
+    return engine_evaluate_release(project, quality, cast)
 
 
 @app.route("/select_cast", methods=["POST"])
 def select_cast():
     data = request.get_json(force=True)
-    selections = data.get("selections", {})
-    cast_ids = list(selections.values()) if isinstance(selections, dict) else []
+    cast_ids = data.get("cast_ids", [])
+    # Ensure cast ids are integers in case they come in as strings
+    try:
+        cast_ids = [int(cid) for cid in cast_ids]
+    except (TypeError, ValueError):
+        cast_ids = []
+
     pool = SESSION.get("talent_pool", [])
     selected = [t for t in pool if t.get("id") in cast_ids]
     SESSION["selected_cast"] = selected
@@ -139,11 +123,20 @@ def release_project():
     project = SESSION.get("selected_project")
     production = SESSION.get("production_result")
     player = SESSION.get("player")
+    cast = SESSION.get("selected_cast", [])
     if not project or not production or not player:
         return jsonify({"error": "Production not completed"}), 400
-    release_results = evaluate_release(project, production.get("quality"))
-    merged_project = {**project, **release_results}
-    add_completed_project(player, merged_project)
+quality = production.get("final_quality_score")
+release_results = evaluate_release(project, quality, cast)
+completed = dict(project)
+completed.update(release_results)
+add_completed_project(player, completed)
+
+SESSION.pop("selected_project", None)
+SESSION.pop("selected_cast", None)
+SESSION.pop("production_result", None)
+return jsonify(release_results)
+
     SESSION.pop("selected_project", None)
     SESSION.pop("selected_cast", None)
     SESSION.pop("production_result", None)
