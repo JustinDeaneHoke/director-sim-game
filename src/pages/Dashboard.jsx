@@ -16,7 +16,7 @@ const Dashboard = () => {
       setLoading(true);
       try {
         const { data } = await getProjects();
-        setProjects(data);
+        setProjects(data.offers);
       } catch (err) {
         setError('Failed to load projects');
       } finally {
