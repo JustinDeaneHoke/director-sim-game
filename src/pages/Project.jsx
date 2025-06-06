@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CastCard from '../components/CastCard';
-import { useProject } from '../context/ProjectContext';
+import { useProject } from '../contexts/ProjectContext';
 
 function Project() {
   const navigate = useNavigate();
