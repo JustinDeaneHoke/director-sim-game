@@ -48,7 +48,7 @@ function Project() {
       await fetch('/select_cast', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cast_ids: Object.values(selected) }),
+        body: JSON.stringify({ selections: selected }),
       });
       navigate('/production');
     } catch (err) {
