@@ -13,20 +13,31 @@ const Dashboard = () => {
 
   useEffect(() => {
     let isMounted = true;
-    const startAndFetch = async () => {
+    const fetchProjects = async () => {
       setLoading(true);
       try {
-        await startGame('Player');
+        // Attempt to fetch projects without starting a new game.
         const { data } = await getProjects();
         if (isMounted) setProjects(data.offers);
       } catch (err) {
-        if (isMounted) setError('Failed to load projects');
+        // If the game hasn't started yet, start a new session then retry.
+        if (err.response?.data?.error === 'Game not started') {
+          try {
+            await startGame('Player');
+            const { data } = await getProjects();
+            if (isMounted) setProjects(data.offers);
+          } catch (startErr) {
+            if (isMounted) setError('Failed to load projects');
+          }
+        } else if (isMounted) {
+          setError('Failed to load projects');
+        }
       } finally {
         if (isMounted) setLoading(false);
       }
     };
 
-    startAndFetch();
+    fetchProjects();
     return () => {
       isMounted = false;
     };
