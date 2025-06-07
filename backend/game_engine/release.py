@@ -72,7 +72,9 @@ def evaluate_release(project: Dict[str, Any], quality_score: int, cast: List[Tal
 
     This function simulates how critics and audiences react to the finished
     project and estimates its financial success. Random modifiers are used to
-    reflect the inherent unpredictability of entertainment releases.
+    reflect the inherent unpredictability of entertainment releases. Television
+    projects can be identified using either a ``medium`` or ``type`` value of
+    ``"tv"`` for backward compatibility.
 
     Parameters
     ----------
@@ -115,17 +117,22 @@ def evaluate_release(project: Dict[str, Any], quality_score: int, cast: List[Tal
     performance_factor = (fan_score / 100) * (average_star_power / 50)
     randomness = random.uniform(0.8, 1.2)
 
-    if project.get("type") == "tv":
+    is_tv = project.get("medium") == "tv" or project.get("type") == "tv"
+
+    if is_tv:
         # For television projects we estimate viewership numbers instead of box
         # office. The scale here is arbitrary but consistent within the game.
         base = project.get("episodes", 1) * 100_000
-        box_office = int(base * performance_factor * randomness)
+        viewership = int(base * performance_factor * randomness)
     else:
         base = 10_000_000  # baseline for film releases
         box_office = int(base * performance_factor * randomness)
 
     budget = project.get("budget", 0)
-    profit = box_office - budget
+    if is_tv:
+        profit = viewership - budget
+    else:
+        profit = box_office - budget
 
     # Determine award wins and nominations.
     awards = evaluate_awards(project, critics_score, fan_score)
@@ -137,11 +144,17 @@ def evaluate_release(project: Dict[str, Any], quality_score: int, cast: List[Tal
         num_noms = min(len(nomination_pool), random.randint(1, 3))
         award_nominations.extend(random.sample(nomination_pool, num_noms))
 
-    return {
+    result = {
         "critics_score": critics_score,
         "fan_score": fan_score,
-        "box_office": box_office,
         "awards": awards,
         "profit": profit,
         "award_nominations": award_nominations,
     }
+
+    if is_tv:
+        result["viewership"] = viewership
+    else:
+        result["box_office"] = box_office
+
+    return result
