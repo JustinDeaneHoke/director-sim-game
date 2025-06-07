@@ -24,6 +24,12 @@ def start_game():
     if not name:
         return jsonify({"error": "Name is required"}), 400
 
+    # If a player already exists in the session, return it without creating
+    # a new one so repeated calls are idempotent.
+    existing = SESSION.get("player")
+    if existing:
+        return jsonify(asdict(existing))
+
     player = Player(name)
     SESSION["player"] = player
 
