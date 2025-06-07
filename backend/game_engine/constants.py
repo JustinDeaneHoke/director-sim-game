@@ -51,13 +51,13 @@ ROLES = [
 
 # Awards used in the game
 AWARDS = [
-    'best picture',
-    'best director',
-    'best screenplay',
-    'best actor',
-    'best actress',
-    'audience choice',
-    'best visual effects'
+    'Best Picture',
+    'Best Director',
+    'Best Screenplay',
+    'Best Actor',
+    'Best Actress',
+    'Audience Choice',
+    'Best Visual Effects'
 ]
 
 # Default tone options
