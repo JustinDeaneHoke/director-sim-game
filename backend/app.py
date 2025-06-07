@@ -95,18 +95,19 @@ def evaluate_release(project, quality, cast):
 @app.route("/select_cast", methods=["POST"])
 def select_cast():
     data = request.get_json(force=True)
-    cast_ids = data.get("cast_ids", [])
-    # Ensure cast ids are integers in case they come in as strings
-    try:
-        cast_ids = [int(cid) for cid in cast_ids]
-    except (TypeError, ValueError):
-        cast_ids = []
+    selections = data.get("selections", {})
 
     pools = SESSION.get("talent_pools", {})
-    # Search across all role pools for the selected ids
     selected: list = []
-    for role_pool in pools.values():
-        selected.extend([t for t in role_pool if t.id in cast_ids])
+    for role, tid in selections.items():
+        try:
+            tid = int(tid)
+        except (TypeError, ValueError):
+            continue
+        pool = pools.get(role, [])
+        talent = next((t for t in pool if t.id == tid), None)
+        if talent:
+            selected.append(talent)
 
     SESSION["selected_cast"] = selected
     return jsonify({"selected_cast": [t.to_dict() for t in selected]})
